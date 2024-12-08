@@ -1,8 +1,8 @@
 import express, { Router } from "express";
 import bcrypt from "bcrypt"
 export const router = Router();
-import z from "zod"
-import { User } from "../db.js";
+import z, { boolean } from "zod"
+import { Account, User } from "../db.js";
 import jwt from "jsonwebtoken"
 import { JWT_SECRET } from "../config.js";
 import authMiddleware from "../authMiddleware.js";
@@ -59,6 +59,10 @@ router.post("/signup",signupValidation, async (req , res)=>{
             const userId = newUser._id;
             console.log("🚀 ~ router.post ~ userId:", userId)
             const token = jwt.sign({userId} , JWT_SECRET)
+            await Account.create({
+                userId,
+                balance : 1+ Math.random() * 10000
+            })
             return res.status(200).json({
                 message : "user created successfully",
                 token
