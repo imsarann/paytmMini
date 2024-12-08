@@ -6,19 +6,20 @@ import { User } from "../db.js";
 import jwt from "jsonwebtoken"
 import { JWT_SECRET } from "../config.js";
 import authMiddleware from "../authMiddleware.js";
-const userBodyParser  = z.object({
+import { salt } from "../config.js"; 
+const signupBody  = z.object({
     firstName : z.string().max(50),
     lastName : z.string().max(50),
     email: z.string().email().max(100),
     password : z.string().min(8).max(150)
 })
-const userBodyParserSignIn  = z.object({
+const signinBody  = z.object({
     email: z.string().email().max(100),
     password : z.string().min(8).max(150)
 })
-function ZodValidationSiginIn(req, res, next){
+function signinValidation(req, res, next){
     const body = req.body;
-    const isOk = userBodyParserSignIn.safeParse(body)
+    const isOk = signinBody.safeParse(body)
     console.log("🚀 ~ bodyZodValidation ~ isOk:", isOk)
     if(!isOk.success){
         return res.status(411).json({message : "Enter valid details"})
@@ -26,22 +27,26 @@ function ZodValidationSiginIn(req, res, next){
         next()
     }
 }
-function bodyZodValidation(req, res, next){
+function signupValidation(req, res, next){
     const body = req.body;
-    const isOk = userBodyParser.safeParse(body)
+    const isOk = signupBody.safeParse(body)
     if(!isOk.success){
         return res.status(411).json({message : "Enter valid details"})
     }else{
         next()
     }
 }
+const userUpdate = z.object({
+    firstName : z.string().max(50).optional(),
+    lastName : z.string().max(50).optional(),
+    password : z.string().optional()
+})
 async function hashPassword(password){
-    const salt = 10;
     const hashedPassword = await bcrypt.hash(password, salt);
     console.log("🚀 ~ hashPassword ~ hashedPassword:", hashedPassword)
     return hashedPassword
 }
-router.post("/signup",bodyZodValidation, async (req , res)=>{
+router.post("/signup",signupValidation, async (req , res)=>{
     try{
         const body = req.body;
         const isUserExist = await User.findOne({
@@ -67,7 +72,7 @@ router.post("/signup",bodyZodValidation, async (req , res)=>{
     
 })
 
-router.post("/signin",ZodValidationSiginIn, async (req, res)=>{
+router.post("/signin",signinValidation, async (req, res)=>{
     const body = req.body;
     console.log("🚀 ~ router.post ~ body:", body)
     const isUserExist = await User.findOne({
@@ -87,4 +92,29 @@ router.post("/signin",ZodValidationSiginIn, async (req, res)=>{
     }
     
 })
-router.post("/check",authMiddleware)
+router.put("/",authMiddleware, async  (req, res)=>{
+    const { success } = userUpdate.safeParse(req.body);
+    if(!success){
+        return res.json({meesage : "Enter valid details"})
+    }
+    if(req.body.password != null){
+    const hashedPassword = await hashPassword(req.body.password);
+    req.body.password = hashedPassword
+    }
+    const user = await User.updateOne({ _id : req.userId }, req.body)
+    return res.json({message : "Updated successfully"})
+})
+
+router.get("/bulk/", authMiddleware, async (req, res)=>{
+    const filter = req.query.filter || "";
+    console.log("🚀 ~ router.get ~ filter:", filter)
+    const results = await User.find({ $or: [ {firstName : { $regex : filter }}, { lastName : { $regex: filter }}] })
+    return res.json({
+        user: results.map(user => ({
+            firstName: user.firstName,
+            lastName: user.lastName,
+            _id: user._id
+        }))
+})
+})
+
