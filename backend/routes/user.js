@@ -20,7 +20,6 @@ const signinBody  = z.object({
 function signinValidation(req, res, next){
     const body = req.body;
     const isOk = signinBody.safeParse(body)
-    console.log("🚀 ~ bodyZodValidation ~ isOk:", isOk)
     if(!isOk.success){
         return res.status(411).json({message : "Enter valid details"})
     }else{
@@ -43,7 +42,6 @@ const userUpdate = z.object({
 })
 async function hashPassword(password){
     const hashedPassword = await bcrypt.hash(password, salt);
-    console.log("🚀 ~ hashPassword ~ hashedPassword:", hashedPassword)
     return hashedPassword
 }
 router.post("/signup",signupValidation, async (req , res)=>{
@@ -57,7 +55,6 @@ router.post("/signup",signupValidation, async (req , res)=>{
             body.password = hashedPassword;
             const newUser =await User.create(body);
             const userId = newUser._id;
-            console.log("🚀 ~ router.post ~ userId:", userId)
             const token = jwt.sign({userId} , JWT_SECRET)
             await Account.create({
                 userId,
@@ -78,16 +75,13 @@ router.post("/signup",signupValidation, async (req , res)=>{
 
 router.post("/signin",signinValidation, async (req, res)=>{
     const body = req.body;
-    console.log("🚀 ~ router.post ~ body:", body)
     const isUserExist = await User.findOne({
         email : body.email,
     })
-    console.log("🚀 ~ router.post ~ isUserExist:", isUserExist)
     if(isUserExist){
         const token = jwt.sign({
             userId : isUserExist._id
         },JWT_SECRET);
-        console.log("🚀 ~ router.post ~ token:", token)
         return res.json({
             token
         })
@@ -111,7 +105,6 @@ router.put("/",authMiddleware, async  (req, res)=>{
 
 router.get("/bulk/", authMiddleware, async (req, res)=>{
     const filter = req.query.filter || "";
-    console.log("🚀 ~ router.get ~ filter:", filter)
     const results = await User.find({ $or: [ {firstName : { $regex : filter }}, { lastName : { $regex: filter }}] })
     return res.json({
         user: results.map(user => ({
