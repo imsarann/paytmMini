@@ -5,6 +5,7 @@ import z from "zod"
 import { User } from "../db.js";
 import jwt from "jsonwebtoken"
 import { JWT_SECRET } from "../config.js";
+import authMiddleware from "../authMiddleware.js";
 const userBodyParser  = z.object({
     firstName : z.string().max(50),
     lastName : z.string().max(50),
@@ -86,4 +87,4 @@ router.post("/signin",ZodValidationSiginIn, async (req, res)=>{
     }
     
 })
-   
+router.post("/check",authMiddleware)
