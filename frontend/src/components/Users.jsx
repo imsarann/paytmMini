@@ -8,6 +8,7 @@ function Users() {
     const token = localStorage.getItem("token");
     if(filter.trim() === ""){
         setUsers(null);
+        console.log("hello inside empty string")
         return;
     }
     const response = await axios.get(
@@ -19,8 +20,6 @@ function Users() {
       }
     );
     setUsers(response.data.users);
-    console.log("Usersss", response.data.users[0]);
-    console.log("🚀 ~ Users ~ Users:", Users);
   };
   const onClickHandle = (user) =>{
     navigate("/transfer", { state :{ user }})
@@ -33,6 +32,7 @@ function Users() {
         className="border w-full px-2 py-1 rounded border-slate-200"
         placeholder="Search users..."
         onChange={(e) => {
+          console.log(e.target.value)
           getUsers(e.target.value);
         }}
       />
