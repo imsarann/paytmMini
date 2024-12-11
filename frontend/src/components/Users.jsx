@@ -1,5 +1,30 @@
+import axios from "axios";
 import React, { useState } from "react";
+import { useNavigate } from 'react-router-dom';
 function Users() {
+  const navigate = useNavigate()
+  const [Users, setUsers] = useState(null);
+  const getUsers = async (filter) => {
+    const token = localStorage.getItem("token");
+    if(filter.trim() === ""){
+        setUsers(null);
+        return;
+    }
+    const response = await axios.get(
+      `http://localhost:3000/api/v1/users/bulk?filter=${filter}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    setUsers(response.data.users);
+    console.log("Usersss", response.data.users[0]);
+    console.log("🚀 ~ Users ~ Users:", Users);
+  };
+  const onClickHandle = (user) =>{
+    navigate("/transfer", { state :{ user }})
+      }
   return (
     <div>
       <div className="font-bold text-lg mt-6">Users</div>
@@ -7,18 +32,28 @@ function Users() {
         type="text"
         className="border w-full px-2 py-1 rounded border-slate-200"
         placeholder="Search users..."
+        onChange={(e) => {
+          getUsers(e.target.value);
+        }}
       />
-      <div className="flex justify-between">
-        <div className="flex m-3">
-          <div className="bg-slate-300 text-lg px-2.5 rounded-full">S</div>
-          <div className="mt-1 ml-4">Saran P</div>
-        </div>
-        <div>
-        <button className="bg-black text-white font-medium rounded-lg px-2 py-1 mt-2">
-          Send Money
-        </button>
-        </div>
-      </div>
+      {Users && Users.map((user, index) => (
+          <div className="flex justify-between" key={index}>
+            <div className="flex m-3">
+              <div className="bg-slate-300 text-lg px-2.5 rounded-full">S</div>
+              
+              <div className="mt-1 ml-4">
+                {user.firstName + " "} 
+                {user.lastName}
+              </div>
+            </div>
+            <div>
+              <button className="bg-black text-white font-medium rounded-lg px-2 py-1 mt-2" onClick={()=>{onClickHandle(user)}}>
+                Send Money
+              </button>
+            </div>
+          </div>
+        ))
+        }
     </div>
   );
 }

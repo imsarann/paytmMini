@@ -1,9 +1,9 @@
 import './App.css'
 import { BrowserRouter, Routes, Route} from "react-router-dom"
-import Signup from './Signup'
-import Signin from './Signin'
-import Dashboard from './Dashboard'
+import Signin from './Pages/Signin'
+import Dashboard from './Pages/Dashboard'
 import SendMoney from './components/SendMoney'
+import Signup from './Pages/Signup'
 function App() {
 
   return (
@@ -13,7 +13,7 @@ function App() {
         <Route path="/signup" element={<Signup/>}/>
         <Route path="/signin" element={<Signin/>}/>
         <Route path="/" element={<Dashboard/>}/>
-        <Route path='transfer' element={<SendMoney/>}/>
+        <Route path='/transfer' element={<SendMoney/>}/>
       </Routes>
       </BrowserRouter>        
     </>

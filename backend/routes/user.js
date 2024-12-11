@@ -45,8 +45,10 @@ async function hashPassword(password){
     return hashedPassword
 }
 router.post("/signup",signupValidation, async (req , res)=>{
+    console.log("requestttttttttt body",req.body)
     try{
         const body = req.body;
+        console.log(body)
         const isUserExist = await User.findOne({
             email : body.email
         })
@@ -105,13 +107,34 @@ router.put("/",authMiddleware, async  (req, res)=>{
 
 router.get("/bulk/", authMiddleware, async (req, res)=>{
     const filter = req.query.filter || "";
+    
     const results = await User.find({ $or: [ {firstName : { $regex : filter }}, { lastName : { $regex: filter }}] })
     return res.json({
-        user: results.map(user => ({
+        users: results.map(user => ({
             firstName: user.firstName,
             lastName: user.lastName,
             _id: user._id
         }))
 })
+})
+
+router.get("/dashboard", authMiddleware,async (req, res)=>{
+    const id = req.userId;
+    const { balance } = await Account.findOne({
+        userId : id
+    })
+    const { firstName, lastName } = await User.findOne({
+        _id : id 
+    })
+    console.log({
+        balance,
+        firstName,
+        lastName
+    })
+    return res.json({
+        balance,
+        firstName,
+        lastName
+    })
 })
 

@@ -1,6 +1,6 @@
 import React from 'react'
 
-function Balance({ value}) {
+function Balance({value}) {
   return (
     <div className='flex mt-2'>
       <div className='font-bold text-lg'>Your balance</div>
