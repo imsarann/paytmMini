@@ -5,10 +5,12 @@ import Users from './components/Users'
 
 function Dashboard() {
   return (
-    <div>
+    <div className='font-serif'>
       <Appbar />
+      <div className='ml-5'>
       <Balance/>
       <Users/>
+      </div>
     </div>
   )
 }
